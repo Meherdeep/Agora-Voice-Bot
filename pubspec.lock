@@ -102,13 +102,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.12"
-  json_annotation:
-    dependency: transitive
-    description:
-      name: json_annotation
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.0.1"
   matcher:
     dependency: transitive
     description:
@@ -177,13 +170,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.7.0"
-  speech_to_text:
+  speech_recognition:
     dependency: "direct main"
     description:
-      name: speech_to_text
+      name: speech_recognition
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.2.0"
+    version: "0.3.0+1"
   stack_trace:
     dependency: transitive
     description:

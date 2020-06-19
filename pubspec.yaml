@@ -32,7 +32,7 @@ dependencies:
   agora_rtm: ^0.9.11
   permission_handler: ^5.0.1
   flutter_text_to_speech: ^3.0.7
-  speech_to_text: ^2.2.0
+  speech_recognition: ^0.3.0+1
 
 dev_dependencies:
   flutter_test:

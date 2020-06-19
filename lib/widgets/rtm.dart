@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:agora_rtm/agora_rtm.dart';
 import 'package:flutter_text_to_speech/flutter_text_to_speech.dart';
-import 'package:speech_to_text/speech_recognition_result.dart';
-import 'package:speech_to_text/speech_to_text.dart';
+import 'package:speech_recognition/speech_recognition.dart';
 
 class RealTimeMessaging extends StatefulWidget {
   final String channelName;
@@ -26,23 +25,28 @@ class _RealTimeMessagingState extends State<RealTimeMessaging> {
   AgoraRtmClient _client;
   AgoraRtmChannel _channel;
 
-  bool _hasSpeech = false;
-  double level = 0.0;
-  double minSoundLevel = 50000;
-  double maxSoundLevel = -50000;
-  String lastWords = "";
-  String lastError = "";
-  String lastStatus = "";
-  String _currentLocaleId = "";
-  List<LocaleName> _localeNames = [];
-  final SpeechToText speech = SpeechToText();
+  SpeechRecognition _speechRecognition;
+  bool _isAvailable = true;
+  bool _isListening = false;
+
+  String resultText = '';
+
 
   @override
   void initState() {
     super.initState();
     _createClient();
+    initSpeechRecognizer();
   }
   
+  void initSpeechRecognizer(){ 
+    _speechRecognition = SpeechRecognition();
+    _speechRecognition.setAvailabilityHandler((bool result) => setState(()=>_isAvailable=result));
+    _speechRecognition.setRecognitionStartedHandler(() => setState(()=> _isListening=true));
+    _speechRecognition.setRecognitionResultHandler((String speech) => setState(()=>resultText=speech));
+    _speechRecognition.setRecognitionCompleteHandler(() => setState(()=> _isListening = false));
+    _speechRecognition.activate().then((result) => setState(()=>_isAvailable=result));
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -65,6 +69,7 @@ class _RealTimeMessagingState extends State<RealTimeMessaging> {
                 padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
                 child: Column(
                         children: [
+                          Text(resultText, style: TextStyle(fontSize: 30, color: Colors.white),),
                           _buildInfoList(),
                           _buildSendChannelMessage(), 
                         ],
@@ -134,7 +139,7 @@ class _RealTimeMessagingState extends State<RealTimeMessaging> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     Container(
-                      width: MediaQuery.of(context).size.width *0.65,
+                      width: MediaQuery.of(context).size.width *0.55,
                       child: TextFormField(
                         controller: _channelMessageController,
                         decoration: InputDecoration(
@@ -155,20 +160,46 @@ class _RealTimeMessagingState extends State<RealTimeMessaging> {
                         ),
                       ),
                     ),
-
                     Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(40)),
-                        border: Border.all(
-                          color: Colors.white70, 
-                          width: 2,
-                        )
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(40)),
+                          border: Border.all(
+                            color: Colors.white70, 
+                            width: 2,
+                          )
+                        ),
+                        
+                        child: IconButton(
+                          icon: Icon(Icons.mic), 
+                          onPressed: () {
+                            if(!_isListening){
+                            _speechRecognition.listen(locale: "en_US").then((result) => print('ITS WORKING : $result'));
+                            print('$resultText');
+                            }
+                          },
+                        ), 
                       ),
-                      child: IconButton(
-                        icon: Icon(Icons.mic, color: Colors.white70), 
-                        onPressed: null, 
-                      ),
-                      ),
+                    Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(40)),
+                          border: Border.all(
+                            color: Colors.white70, 
+                            width: 2,
+                          )
+                        ),
+                        
+                        child: IconButton(
+                          icon: Icon(Icons.mic_off), 
+                          onPressed: () {
+                            print('THE FINAL OUTPUT IS: $resultText');
+                            _speechRecognition.cancel().then((result) => setState((){
+                              _isListening = false;
+                              resultText = '';
+                            }));
+                            
+                          },
+                        ), 
+                      ),    
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(40)),
