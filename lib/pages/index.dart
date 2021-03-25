@@ -1,6 +1,6 @@
 import 'package:agora_voice_bot/pages/callpage.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:permission/permission.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -155,8 +155,8 @@ class _MyHomePageState extends State<MyHomePage> {
     });
     if (channelNameController.text.isNotEmpty) {
       // await for camera and mic permissions before pushing video page
-      await _handleCameraAndMic(Permission.camera);
-      await _handleCameraAndMic(Permission.microphone);
+      await _handleCameraAndMic();
+      // await _handleCameraAndMic(Permission.microphone);
       // push video page with given channel name
       await Navigator.push(
         context,
@@ -168,8 +168,11 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Future<void> _handleCameraAndMic(Permission permission) async {
-    final status = await permission.request();
-    print(status);
+  Future<void> _handleCameraAndMic() async {
+    List<PermissionName> permissionNames = [
+      PermissionName.Camera,
+      PermissionName.Microphone
+    ];
+    await Permission.requestPermissions(permissionNames);
   }
 }
